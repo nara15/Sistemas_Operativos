@@ -1,16 +1,59 @@
+/**
+ * Archivo list_dir.c
+ * Despliegue de una ruta en forma de árbol
+ * 
+ * Estudiante : José Mario Naranjo Leiva
+ * Carnet :     2013034348
+ **/
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <linux/limits.h>
 
-int is_directory(const char *p_ruta)
+/**
+ * Esta función determina si una ruta dada corresponde a un archivo
+ * Entradas:
+ *          p_ruta: const char (ruta que se desea verificar)
+ * Salida:
+ *          1 - es archivo
+ *          0 - de lo contrario
+ **/ 
+int es_archivo(const char *p_ruta)
 {
-    struct stat statbuf;
-    if (stat(p_ruta, &statbuf) != 0) return 0;
-    return S_ISDIR(statbuf.st_mode);
+    struct stat path_stat;
+    stat(p_ruta, &path_stat);
+    return S_ISREG(path_stat.st_mode);
 }
 
+/**
+ * Esta función se encarga de verificar si la ruta es la ruta relativa . o ..
+ * Entradas:
+ *          p_ruta_nombre: const char (ruta que se desea verificar)
+ * Salida:
+ *      0 - es la ruta relativa 0 o 1. No se pueden expandir
+ *      1 - sí se puede expandir la ruta.
+ **/ 
+int se_puede_expandir(const char *p_ruta_nombre)
+{
+    if ( !strcmp(".", p_ruta_nombre) || !strcmp("..", p_ruta_nombre))
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
 
+/**
+ * Esta función recursiva se encarga de ir mostrando recursivamente los archivos del directorio
+ * y sus subdirectorios.
+ * Entradas:
+ *          p_nombreDir : const char (ruta que se desea listar).
+ * Salida:
+ *          imprime el árbol de visualización del directorio.
+ **/
 int listar_directorio(const char *p_nombreDir)
 {
     struct dirent* dp;                   // Puntero a la entrada del directorio
@@ -18,46 +61,48 @@ int listar_directorio(const char *p_nombreDir)
     
     if (dir == NULL)
     {
-        printf("No se pudo abrir el directorio");
+        if (es_archivo(p_nombreDir))
+        {
+            struct stat st;
+            stat(p_nombreDir, &st);
+            int size = st.st_size;
+            printf(" NOMBRE DE ARCHIVO: %s ---- Tamaño: %i bytes \n",p_nombreDir, size);
+        }
+        else
+        {
+            printf("No se pudo abrir el directorio\n");
+        }
+        
         return -1;
     }
-    
-    while ((dp = readdir(dir)) != NULL)
+    else
     {
-        printf("%s\n", dp->d_name);
-        if ( is_directory(dp->d_name))
+        printf("%s \n",p_nombreDir);
+        while ((dp = readdir(dir)) != NULL)
         {
-            //printf("%s\n", dp->d_name);
+            if (se_puede_expandir(dp->d_name))
+            {
+
+                char path[100];
+                strcpy(path, p_nombreDir);
+                strcat(path, "/");
+                strcat(path, dp->d_name);
+
+                listar_directorio(path);
+            }
         }
     }
     
     closedir(dir);
+    printf("%s ******************************* FIN \n",p_nombreDir);
+    
 }
 
+
+// Entrada del programa.
 int main()
 {
-    listar_directorio("../../LAB6");
+    //Se está probando el directorio actual donde se encuentra este archivo.
+    listar_directorio(".");
+    
 }
-
-/*
-int main(void)
-{
-    struct dirent *de;  // Pointer for directory entry
-
-    // opendir() returns a pointer of DIR type. 
-    DIR *dr = opendir(".");
-
-    if (dr == NULL)  // opendir returns NULL if couldn't open directory
-    {
-        printf("Could not open current directory" );
-        return 0;
-    }
-
-    // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html
-    // for readdir()
-    while ((de = readdir(dr)) != NULL)
-            printf("%s\n", de->d_name);
-
-    closedir(dr);    
-    return 0;
-}*/
