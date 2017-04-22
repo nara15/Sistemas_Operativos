@@ -18,7 +18,7 @@ char* get_timestamp()
 int main(int argc, char* argv[])
 {
     /* El archivo al cuál agregarle la impresión del tiempo*/
-    char* filename = argv[1];
+    char* filename = "hola.txt";//argv[1];
     /* Obtener la hora actual */
     char* timestamp = get_timestamp();
     /*Abrir el archivo. Si existe, agregue; sino, cree un nuevo archivo*/
