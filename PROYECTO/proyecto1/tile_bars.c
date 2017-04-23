@@ -62,6 +62,7 @@ void file_process(char* filename, char *keywords[], int num_keys) {
     }
 
     print_bar(keywords,num_keys, num_line,counters);
+   
 
     fclose(fp);
     if (line)
