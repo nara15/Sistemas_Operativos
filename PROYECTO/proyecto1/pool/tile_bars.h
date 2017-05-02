@@ -1,7 +1,9 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+/*
 #include <sys/types.h>
 
 int keyword_process(char* line, char* keyword) {
@@ -20,17 +22,14 @@ int keyword_process(char* line, char* keyword) {
 
 void line_process(char* line, int line_id, char *keywords[], int num_keys, int *counters) {
 
-    int i;
-    for (i = 0; i<num_keys; i++)
+    for (int i=0; i<num_keys; i++)
         counters[i*500+line_id] = keyword_process(line,keywords[i]);
 }
 
 void print_bar(char *keywords[], int num_keys, int num_line, int* counters) {
-    int j;
-    for (j=0; j<num_keys; j++) {
+    for (int j=0; j<num_keys; j++) {
         printf("%-15s",keywords[j]);
-        int i;
-        for (i=0; i<num_line; i++) {
+        for (int i=0; i<num_line; i++) {
             if (counters[j*500+i]==0)
                 printf("\u2591");
             else if (counters[j*500+i]==1)
@@ -70,35 +69,5 @@ void file_process(char* filename, char *keywords[], int num_keys) {
     if (line)
         free(line);
 }
+*/
 
-int main (int argc, char *argv[]) {
-    char *keywords[6];
-
-    if (argc==1) {
-        printf("No files specified\n");
-        exit(EXIT_FAILURE);
-    }
-    clock_t tic = clock();
-
-    int num_keys=0;
-    char *token = strtok(argv[1], ",");
-    while (token!=NULL && num_keys < 6) {
-        int size = strlen(token);
-        keywords[num_keys] = malloc(sizeof(char)*size+1);
-        strncpy(keywords[num_keys],token,size+1);
-        token = strtok(NULL, ",");
-        num_keys++;
-    }
-     printf("Hola %s", keywords[0]);
-    
-    int i;
-    for (i=2; i< argc; i++) {
-        printf("%s\n",argv[i]);
-        file_process(argv[i],keywords,num_keys);
-    }
-
-    clock_t toc= clock();
-    printf("Elapsed: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
-    
-    exit(EXIT_SUCCESS);
-}

@@ -1,5 +1,3 @@
-//http://www.cs.kent.edu/~ruttan/sysprog/lectures/multi-thread/thread-pool-server-with-join.c
-
 #include <stdio.h>       
 #define __USE_GNU 
 
@@ -43,7 +41,7 @@ struct Job
 {
     int job_id;                     //  Identificador del trabajo
     struct Job* next_job;           //  Puntero al próximo trabajo 
-    struct arg_structure* args;     //  Argumento de la función
+    struct arg_structure* args;                      //  Argumento de la función
     void (*function)(void* arg);    //  Puntero a la función
 };
 
@@ -156,16 +154,7 @@ void doJob(struct Job* p_Job_to_do, int p_thread_ID)
 {
     if (p_Job_to_do) 
     {
-        
-        void (*function_buffer)(void*);
-        void* args_buff;
-        
-        args_buff = p_Job_to_do -> args;
-        function_buffer = p_Job_to_do -> function;
-        
-        function_buffer (args_buff);
-        
-    	printf("Thread '%d' handled request '%d'\n",p_thread_ID, p_Job_to_do -> job_id);
+    	printf("Thread '%d' handled request '%d' with 1st parameter '%d' \n",p_thread_ID, p_Job_to_do -> job_id, p_Job_to_do -> args -> arg1);
     	fflush(stdout);
     }
 }
@@ -216,8 +205,7 @@ void* handle_Job_Requests(void* data)
 
 void* task1(void* p_args)
 {
-    struct arg_structure *args = (struct arg_structure *) p_args;
-    printf("Hola soy la tarea con parametros: PRIMERO : '%d' SEGUNDO : '%d' ", args -> arg1, args -> arg2);
+    
 }
 
 
@@ -232,7 +220,7 @@ int main(int argc, char* argv[])
     
     struct arg_structure args;
     args.arg1 = 5;
-    //args.arg2 = 7;
+    args.arg2 = 7;
 
  
     for (i = 0; i < NUM_THREADS_IN_POOL; i ++)
@@ -247,7 +235,7 @@ int main(int argc, char* argv[])
     	//add_job_request(i, &request_mutex, &got_job_request);
         add_job_request(i, (void*) task1, (void *)&args, &got_job_request, &request_mutex);
     
-    	if (rand() > 3*(RAND_MAX / 4)) 
+    	if (rand() > 3*(RAND_MAX/4)) 
     	{ 
     	    delay.tv_sec = 0;
     	    delay.tv_nsec = 1;
@@ -266,7 +254,7 @@ int main(int argc, char* argv[])
 
 
     //  Se debe esperar que ya no hayan más trabajos en la cola y que los hilos acaben
-    for (i = 0; i < NUM_THREADS_IN_POOL; i ++) 
+    for (i=0; i<NUM_THREADS_IN_POOL; i ++) 
     {
     	void* thr_retval;
     	pthread_join(threadPool[i], &thr_retval);
